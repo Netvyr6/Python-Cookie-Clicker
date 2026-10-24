@@ -1,5 +1,9 @@
 {
-    "cookie_count": 32,
+    "cookie_count": 53,
     "highestScore": 53,
-    "cookiesPerSecond": 1
+    "cookiesPerSecond": 0,
+    "upgrade_cost": 50,
+    "level": 3,
+    "loading_value": 0,
+    "clickStrength": 3
 }
