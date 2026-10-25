@@ -7,6 +7,8 @@ import tkinter as tk
 import math
 from tkinter.ttk import *
 
+presscountF= 0
+presscountM = 0
 cookiesPerSecond = 0
 cookie_count = 0
 highestScore = 0
@@ -15,6 +17,7 @@ loading_value = 0
 clicks = 0
 level = 1
 clickStrength = 1
+
 
 try:
     with open("mydata.json", "r") as file:
@@ -50,6 +53,49 @@ tk.Label(loading_frame, text="Loading game...", bg="lightblue").pack(pady=20)
 loading_bar = Progressbar(loading_frame, mode="indeterminate", length=300)
 loading_bar.pack()
 loading_bar.start(10)
+
+def fullscreenS():
+    global presscountF
+    odd=0
+    presscountF +=1
+    if presscountF % 2 ==odd:
+        root.attributes("-fullscreen", True)
+
+    elif presscountF % 2 !=odd:                          
+        root.attributes("-fullscreen", False)
+    
+
+def stopMusicS():
+    global presscountM
+    odd=0
+    presscountM +=1
+    if presscountM % 2 ==odd:
+        pygame.mixer.music.play()
+        pygame.mixer.music.set_volume(0.5)
+    elif presscountM % 2 !=odd:                          
+        pygame.mixer.music.stop()
+
+def settings():
+    global settings_frame
+    my_frame.pack_forget()
+    settings_frame = tk.Frame(root, bg="lightblue")
+    settings_frame.pack(fill="both", expand=True)
+
+    tk.Label(settings_frame, text="settings", font=("Arial", 30), bg="lightblue").pack(pady=20)
+    stopMusic = tk.Button(settings_frame, text="Music", font=("Arial", 20), command=stopMusicS)
+    stopMusic.pack(pady=20)
+
+    saveSettings = tk.Button(settings_frame, text="Back", font=("Arial", 20), command=reload_game)
+    saveSettings.place(x=10, y=10)
+
+    fullscreen = tk.Button(settings_frame, text="Fullscreen",font=("Arial", 20), command=fullscreenS)
+    fullscreen.pack(pady=30)
+
+
+
+
+
+
 
 
 def sound_effect():
@@ -152,11 +198,11 @@ def start_game():
     global my_frame, cookieimage, IMG_WIDTH, IMG_HEIGHT
     global CENTER_X, CENTER_Y, radius, cookie_canvas
     global upgrade_cost_label, UpgradeButton1, levelBar, levelLabel
-    global cookiePoints, highScoreLabel, reset_button
+    global cookiePoints, highScoreLabel
     
     loading_bar.stop()
     loading_frame.destroy()
-
+    
     pygame.mixer.init()
     pygame.mixer.music.load("backgroundMusic.mp3")
     pygame.mixer.music.set_volume(0.5)
@@ -182,7 +228,7 @@ def start_game():
     cookie_canvas.pack(pady=240)
     cookie_canvas.create_image(CENTER_X, CENTER_Y, image=cookieimage)
 
-    root.bind("<Button-1>", checkClick)
+    cookie_canvas.bind("<Button-1>", checkClick)
 
     upgrade_cost_label = tk.Label(
         my_frame,
@@ -239,17 +285,119 @@ def start_game():
     )
     highScoreLabel.place(x=10, y=50)
 
-    reset_button = tk.Button(
+    settings_button = tk.Button(
         my_frame,
-        text="Reset",
+        text="settings",
         font=("Arial", 20),
-        command=reset_cookie_count,
+        command=settings,
         bg="lightblue",
         borderwidth=0
     )
-    reset_button.place(x=10, y=750)
+    settings_button.place(x=10, y=750)
 
     root.after(1000, update_cookie_tick)
+
+
+
+
+
+
+def reload_game():
+    global my_frame, cookieimage, IMG_WIDTH, IMG_HEIGHT
+    global CENTER_X, CENTER_Y, radius, cookie_canvas
+    global upgrade_cost_label, UpgradeButton1, levelBar, levelLabel
+    global cookiePoints, highScoreLabel
+    
+    settings_frame.destroy()
+
+
+    my_frame.pack(padx=20, pady=20, fill=BOTH, expand=True)
+
+   
+    IMG_WIDTH = cookieimage.width()
+    IMG_HEIGHT = cookieimage.height()
+    CENTER_X = IMG_WIDTH // 2
+    CENTER_Y = IMG_HEIGHT // 2
+    radius = CENTER_X
+
+    cookie_canvas = tk.Canvas(
+        my_frame,
+        width=IMG_WIDTH,
+        height=IMG_HEIGHT,
+        bg="lightblue",
+        highlightthickness=0
+    )
+    cookie_canvas.pack(pady=240)
+    cookie_canvas.create_image(CENTER_X, CENTER_Y, image=cookieimage)
+    cookie_canvas.bind("<Button-1>", checkClick)
+
+
+    upgrade_cost_label = tk.Label(
+        my_frame,
+        text=f"Upgrade Cost: {upgrade_cost} cookies",
+        font=("Arial", 20),
+        bg="lightblue"
+    )
+    upgrade_cost_label.place(x=1150, y=10)
+
+    UpgradeButton1 = tk.Button(
+        my_frame,
+        text="Upgrade",
+        font=("Arial", 20),
+        command=upgrade_cookie,
+        bg="lightblue",
+        borderwidth=0
+    )
+    UpgradeButton1.place(x=10, y=90)
+
+    levelBar = Progressbar(
+        my_frame,
+        orient=HORIZONTAL,
+        length=300,
+        mode="determinate",
+        maximum=100,
+        value=loading_value
+    )
+
+    levelLabel = tk.Label(
+        my_frame,
+        text=f"level: {level}",
+        font=("Arial", 20),
+        bg="lightblue",
+        anchor="n",
+        justify="center"
+    )
+    levelLabel.place(x=700, y=40)
+    levelBar.place(x=600, y=10)
+
+    cookiePoints = tk.Label(
+        my_frame,
+        text=f"Total cookies: {cookie_count}",
+        font=("Arial", 20),
+        bg="lightblue",
+        justify="center"
+    )
+    cookiePoints.place(x=10, y=10)
+
+    highScoreLabel = tk.Label(
+        my_frame,
+        text=f"Highest Score: {highestScore}",
+        font=("Arial", 20),
+        bg="lightblue"
+    )
+    highScoreLabel.place(x=10, y=50)
+
+    settings_button = tk.Button(
+        my_frame,
+        text="settings",
+        font=("Arial", 20),
+        command=settings,
+        bg="lightblue",
+        borderwidth=0
+    )
+    settings_button.place(x=10, y=750)
+
+  
 
 
 root.after(random.randint(1000, 3000), start_game)
